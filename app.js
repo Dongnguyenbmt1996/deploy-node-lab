@@ -1,3 +1,5 @@
+require("dotenv").config();
+
 const express = require("express");
 const bodyParser = require("body-parser");
 const mongoose = require("mongoose");
@@ -6,7 +8,6 @@ const authRoutes = require("./routes/auth");
 const { Result } = require("express-validator");
 const path = require("path");
 const multer = require("multer");
-const { Socket } = require("socket.io");
 const app = express();
 
 const fileStorage = multer.diskStorage({
@@ -60,18 +61,18 @@ app.use((error, req, res, next) => {
   const data = error.data;
   res.status(status).json({ message: message, data: data });
 });
-
+const PORT = process.env.PORT || 8080;
+app.get("/", (req, res) => {
+  res.send("Hello from Render with HTTPS!");
+});
 mongoose
   .connect(
-    "mongodb+srv://thuongdongbmt:SEv2NPZeN5Kn6jnr@lab.o3q6ld5.mongodb.net/"
+    `mongodb+srv://${process.env.MONGODB_USERNAME}:${process.env.MONGODB_PASSWORD}@lab.o3q6ld5.mongodb.net/${process.env.MONGODB_DBNAME}?retryWrites=true&w=majority`
   )
   .then((result) => {
-    const server = app.listen(8080);
-    const io = require("./socket").init(server);
-    io.on("connection", (socket) => {
-      console.log("Client connected");
+    app.listen(PORT, () => {
+      console.log(`Server is running on port ${PORT}`);
     });
-    // console.log("connect mongoodb");
   })
   .catch((err) => {
     console.log(err);
